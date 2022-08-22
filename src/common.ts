@@ -1,3 +1,5 @@
+import path from 'path';
+
 export const GAME_ID = 'marvelsspidermanremastered';
 export const TOOL_ID = 'SMPCModdingTool';
 export const TOOL_EXEC = 'SMPCTool.exe';
@@ -13,3 +15,11 @@ export const SMPCTool = {
     TOOL_EXEC,
   ],
 };
+
+export function getSMPCModPath() {
+  return path.join('SMPCTool', 'ModManager', 'SMPCMods');
+}
+
+export function getLOFilePath() {
+  return path.join('SMPCTool', 'ModManager', LO_FILE);
+}
