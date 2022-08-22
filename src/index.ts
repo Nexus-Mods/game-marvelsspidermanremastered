@@ -159,6 +159,22 @@ function main(context: types.IExtensionContext) {
       + 'If no entries are present in the list, install some mods and make sure to deploy.',
   })
 
+  const onPurge = (profileId: string) => {
+    const state = context.api.getState();
+    const profile = selectors.profileById(state, profileId);
+    if (profile?.gameId !== GAME_ID) {
+      return Promise.resolve();
+    }
+    
+    const modsPath = getSMPCModPath();
+    const mods = util.getSafe(state, ['persistent', 'mods', GAME_ID], {});
+    if (!modsPath || Object.keys(mods).length === 0) {
+      return Promise.resolve();
+    }
+    runSMPCTool(context.api, path.resolve(modsPath, '..', '..', TOOL_EXEC));
+    return Promise.resolve();
+  };
+
   context.once(() => {
     context.api.events.on('did-install-mod', (gameId: string, archiveId: string, modId: string) => {
       if (gameId !== GAME_ID) {
@@ -237,28 +253,28 @@ function main(context: types.IExtensionContext) {
     });
 
     context.api.onAsync('did-purge', async (profileId: string) => {
-      const state = context.api.getState();
-      const profile = selectors.profileById(state, profileId);
-      if (profile?.gameId !== GAME_ID) {
-        return Promise.resolve();
-      }
-      
       const loFile = getInstallFilePath();
-      const modsPath = getSMPCModPath();
-      const mods = util.getSafe(state, ['persistent', 'mods', GAME_ID], {});
-      if (!modsPath || !loFile || Object.keys(mods).length === 0) {
+      if (!loFile) {
         return Promise.resolve();
       }
-
       try {
         await fs.removeAsync(loFile);
       } catch (err) {
         // nop
       }
-      runSMPCTool(context.api, path.resolve(modsPath, '..', '..', TOOL_EXEC));
-      return Promise.resolve();
+      return onPurge(profileId);
     });
-  })
+
+    context.api.onAsync('did-remove-mods', (gameMode: string) => {
+      const state = context.api.getState();
+      const profileId = selectors.lastActiveProfileForGame(state, gameMode);
+      const profile = selectors.profileById(state, profileId);
+      if (profile?.gameId !== GAME_ID) {
+        return Promise.resolve();
+      }
+      return onPurge(profile.id)
+    });
+  });
 
   return true;
 }
