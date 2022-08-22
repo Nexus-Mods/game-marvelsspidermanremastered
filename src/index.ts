@@ -99,6 +99,10 @@ function main(context: types.IExtensionContext) {
     if (modsPath) {
       util.opn(modsPath).catch(err => undefined);
     }
+  }, () => {
+    const state = context.api.getState();
+    const activeGameId = selectors.activeGameId(state);
+    return activeGameId === GAME_ID;
   });
 
   context.registerDashlet('Spider-Man Modding Tool Attributions', 2, 1, 10, SMPCAttribDashlet, (state: types.IState) => {
