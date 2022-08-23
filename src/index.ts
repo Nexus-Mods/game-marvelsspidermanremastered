@@ -18,13 +18,13 @@ async function findGame() {
 }
 
 async function prepareForModding(context: types.IExtensionContext, discovery: types.IDiscoveryResult) {
-  let state = context.api.getState();
-  const isPremium = util.getSafe(state, ['persistent', 'nexus', 'userInfo', 'isPremium'], false);
-  if (isPremium) {
-    return Promise.resolve();
-  }
   try {
     await fs.ensureDirWritableAsync(path.join(discovery.path, getSMPCModPath()));
+    let state = context.api.getState();
+    const isPremium = util.getSafe(state, ['persistent', 'nexus', 'userInfo', 'isPremium'], false);
+    if (isPremium) {
+      return Promise.resolve();
+    }
     await ensureSMPC(context.api, discovery);
   } catch (err) {
     return Promise.reject(err);
@@ -170,6 +170,12 @@ function main(context: types.IExtensionContext) {
         return Promise.resolve();
       }
       const state = context.api.getState();
+      const isPremium = util.getSafe(state, ['persistent', 'nexus', 'userInfo', 'isPremium'], false);
+      if (!isPremium) {
+        // We can't setup the modding tool before deployment as a free user since he needs
+        //  to go through the website - no point in checking for SMPC.
+        return Promise.resolve();
+      }
       const mods = state.persistent.mods[GAME_ID] ?? {};
       const mod = Object.values(mods).find(m => m.type === 'smpc-modding-tool');
       let discovery = selectors.discoveryByGame(context.api.getState(), GAME_ID);
@@ -178,6 +184,7 @@ function main(context: types.IExtensionContext) {
       }
       return Promise.resolve();
     });
+
     context.api.onAsync('did-deploy', async (profileId, deployment) => {
       const state = context.api.getState();
       const profile = selectors.profileById(state, profileId);
