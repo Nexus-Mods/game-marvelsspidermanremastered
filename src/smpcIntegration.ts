@@ -44,7 +44,7 @@ export async function ensureSMPC(api: types.IExtensionApi, discovery: types.IDis
       : (getUploadTime(prev as any)) > (getUploadTime(m))
         ? prev
         : m, undefined);
-    if (execPath !== discovery.tools?.[TOOL_ID].path) {
+    if (execPath !== discovery.tools?.[TOOL_ID]?.path) {
       updateSMPCTool(api, execPath);
     }
     util.batchDispatch(api.store, [
