@@ -1,6 +1,6 @@
 {
   "name": "marvels-spider-man-remastered",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Adds Vortex game support for Marvel's Spider-Man Remastered",
   "main": "./out/index.js",
   "repository": "",

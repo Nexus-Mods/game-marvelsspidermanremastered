@@ -71,21 +71,32 @@ export async function ensureSMPC(api: types.IExtensionApi, discovery: types.IDis
 }
 
 async function getLatestFileInfo(api: types.IExtensionApi, APIKEY: string): Promise<IFileInfo> {
-  
-  const response = await axios.get(`https://api.nexusmods.com/v1/games/${GAME_ID}/mods/51/files`, {
+  let response;
+  try {
+    response = await axios.get(`https://api.nexusmods.com/v1/games/${GAME_ID}/mods/51/files`, {
     headers: {
       apikey: APIKEY,
     }
   });
+  } catch (err) {
+    log('error', 'failed to get latest file info', err.message);
+    return Promise.reject(new Error('Failed to retrieve latest file info'));
+  }
   return response.data.files[response.data.files.length - 1];
 }
 
 async function downloadPrem(api: types.IExtensionApi, fileInfo: IFileInfo, key: string): Promise<string> {
-  const response = await axios.get(`https://api.nexusmods.com/v1/games/${GAME_ID}/mods/51/files/${fileInfo.file_id}/download_link`, {
+  let response;
+  try {
+    response = await axios.get(`https://api.nexusmods.com/v1/games/${GAME_ID}/mods/51/files/${fileInfo.file_id}/download_link`, {
     headers: { 
       apikey: key,
     }
   });
+  } catch (err) {
+    log('error', 'failed to get download link', err.message);
+    return Promise.reject(new Error('Failed to retrieve download link'));
+  }
   const url = response.data[0].URI;
   return runDownload(api, fileInfo, url);
 }
