@@ -16,7 +16,7 @@
   "author": "Black Tree Gaming Ltd.",
   "license": "GPL-3.0",
   "config": {
-    "game": "Spider-Man Remastered"
+    "game": "Spider-Man Remastered and Miles Morales"
   },
   "babel": {
     "presets": [
