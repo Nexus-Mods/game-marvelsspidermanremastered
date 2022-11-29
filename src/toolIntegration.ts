@@ -187,7 +187,7 @@ export function updateSMPCTool(api: types.IExtensionApi,
   }, true));
 }
 
-export function makeTestMerge(api: types.IExtensionApi, gameId: string) {
+export function makeTestMerge(api: types.IExtensionApi, gameId: string): types.MergeTest {
   return (game) => {
     if (game.id !== gameId) {
       return undefined;
@@ -204,7 +204,7 @@ let MERGED_PATHS = [];
 export function resetMergedPaths() {
   MERGED_PATHS = [];
 }
-export function makeMerge(api: types.IExtensionApi, gameId: string) {
+export function makeMerge(api: types.IExtensionApi, gameId: string): types.MergeFunc {
   return async (filePath, mergePath) => {
     // creates a new archive from the loose files in the mod directories
 

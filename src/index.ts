@@ -1,4 +1,4 @@
-import { actions, fs, selectors, types, util } from 'vortex-api';
+import { actions, fs, log, selectors, types, util } from 'vortex-api';
 
 import { GAME_ID, SMPC_INFO, SMPCTool, MOD_EXT, TOOL_EXEC, getLOFilePath, getSMPCModPath, MM_GAME_ID, MM_PCTool, MOD_TYPE_ID, TOOL_TYPE_ID, MM_MOD_EXT, MM_TOOL_EXEC } from './common';
 import { ensureSMPC, ensureSuitTool, makeMerge, makeTestMerge, resetMergedPaths, runSMPCTool, runSuitTool, updateSMPCTool } from './toolIntegration';
@@ -287,9 +287,17 @@ function main(context: types.IExtensionContext) {
       forceToolRun = false;
       const toolExec = profile.gameId === GAME_ID ? TOOL_EXEC : MM_TOOL_EXEC;
       setTitle(context.api.translate('Running SMPC Tool'));
-      await runSMPCTool(context.api, path.resolve(modsPath, '..', '..', toolExec));
+      try {
+        await runSMPCTool(context.api, path.resolve(modsPath, '..', '..', toolExec));
+      } catch (err) {
+        log('warn', 'failed to run SMPC', err.message);
+      }
       setTitle(context.api.translate('Running Suit Adder Tool'));
-      await runSuitTool(context.api, profile.gameId, path.join(discovery.path, 'SMPCTool'), deployment);
+      try {
+        await runSuitTool(context.api, profile.gameId, path.join(discovery.path, 'SMPCTool'), deployment);
+      } catch (err) {
+        log('warn', 'failed to run suit adder tool', err.message);
+      }
     });
 
     context.api.onAsync('will-purge', async (profileId: string) => {

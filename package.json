@@ -1,11 +1,11 @@
 {
   "name": "marvels-spider-man-remastered",
-  "version": "2.0.0",
-  "description": "Adds Vortex game support for Marvel's Spider-Man Remastered and Miles Morales",
+  "version": "2.0.1",
+  "description": "Adds Vortex game support for Marvel's Spider-Man Remastered",
   "main": "./out/index.js",
   "repository": "",
   "scripts": {
-    "copyassets": "node copyAssets.js",
+    "copyassets": "copyfiles -f assets/* dist",
     "webpack": "node ./node_modules/webpack/bin/webpack --config webpack.config.js --progress",
     "bundle7z": "7z a -t7z game-spiderman.7z .\\dist\\*.*",
     "build": "npm run webpack && extractInfo && yarn copyassets",
@@ -16,7 +16,7 @@
   "author": "Black Tree Gaming Ltd.",
   "license": "GPL-3.0",
   "config": {
-    "game": "Spider-Man Remastered and Miles Morales"
+    "game": "Spider-Man Remastered"
   },
   "babel": {
     "presets": [
@@ -32,6 +32,7 @@
     "@typescript-eslint/eslint-plugin": "^5.32.0",
     "@typescript-eslint/parser": "^5.32.0",
     "bluebird": "^3.7.2",
+    "copyfiles": "^2.4.1",
     "eslint": "^8.21.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.2.1",
@@ -49,7 +50,6 @@
   "dependencies": {
     "@nexusmods/nexus-api": "Nexus-Mods/node-nexus-api",
     "react-i18next": "^11.18.4",
-    "shortid": "^2.2.16",
-    "turbowalk": "Nexus-Mods/node-turbowalk"
+    "shortid": "^2.2.16"
   }
 }
