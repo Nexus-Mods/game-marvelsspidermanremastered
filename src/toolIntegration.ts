@@ -141,8 +141,10 @@ export async function ensureSuitTool(api: types.IExtensionApi, gameId: string, d
 }
 
 async function download(api: types.IExtensionApi, gameId: string, nexusModId: number) {
-  const modFiles: IFileInfo[] = await api.ext.nexusGetModFiles(gameId, nexusModId);
+  // this requires vortex 1.7
+  // const modFiles: IFileInfo[] = await api.ext.nexusGetModFiles(gameId, nexusModId);
 
+  const modFiles: IFileInfo[] = (await api.emitAndAwait('get-mod-files', gameId, nexusModId))[0];
   const fileTime = (input: IFileInfo) => Number.parseInt(input.uploaded_time, 10);
 
   const latestFile: IFileInfo = modFiles
@@ -155,7 +157,9 @@ async function download(api: types.IExtensionApi, gameId: string, nexusModId: nu
   const downloads = state.persistent.downloads.files;
   let downloadId = Object.keys(downloads).find(id => downloads[id]?.modInfo?.nexus?.fileInfo?.file_id === latestFile.file_id);
   if (downloadId === undefined) {
-    downloadId = await (api.ext.nexusDownload as any)(gameId, nexusModId, latestFile.file_id, undefined, false);
+    // requires vortex 1.7
+    // downloadId = await (api.ext.nexusDownload as any)(gameId, nexusModId, latestFile.file_id, undefined, false);
+    downloadId = (await api.emitAndAwait('nexus-download', gameId, nexusModId, latestFile.file_id, undefined, false))[0];
   }
 
   return { downloadId, version: latestFile.version };
