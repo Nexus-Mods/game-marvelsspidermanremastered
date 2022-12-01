@@ -261,7 +261,13 @@ function main(context: types.IExtensionContext) {
       const mod = Object.values(mods).find(m => m.type === TOOL_TYPE_ID);
       const discovery: types.IDiscoveryResult = selectors.discoveryByGame(context.api.getState(), profile.gameId);
       if (mod === undefined || !isModEnabled(context.api, profile.gameId, mod.id)) {
-        await ensureSMPC(context.api, profile.gameId, discovery);
+        try {
+          await ensureSMPC(context.api, profile.gameId, discovery);
+        } catch (err) {
+          if (!(err instanceof util.UserCanceled)) {
+            context.api.showErrorNotification('Failed to install SMPC', err);
+          }
+        }
       }
       return Promise.resolve();
     });

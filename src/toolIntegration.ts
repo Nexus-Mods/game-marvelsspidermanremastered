@@ -25,11 +25,13 @@ async function queryUser(api: types.IExtensionApi, gameId: string) {
   } else {
     const nexusModId: number = gameId === GAME_ID ? TOOL_PAGE_ID : MM_TOOL_PAGE_ID;
     const modId = await downloadAndInstall(api, gameId, nexusModId);
-    const staging = selectors.installPathForGame(api.getState(), gameId);
-    const toolExec = gameId === GAME_ID ? TOOL_EXEC : MM_TOOL_EXEC;
-    const execPath = path.join(staging, modId, toolExec);
-    // TODO: this configures the tool to be run from the staging folder. Do we even have to deploy it then?
-    updateSMPCTool(api, gameId, execPath);
+    if (modId !== undefined) {
+      const staging = selectors.installPathForGame(api.getState(), gameId);
+      const toolExec = gameId === GAME_ID ? TOOL_EXEC : MM_TOOL_EXEC;
+      const execPath = path.join(staging, modId, toolExec);
+      // TODO: this configures the tool to be run from the staging folder. Do we even have to deploy it then?
+      updateSMPCTool(api, gameId, execPath);
+    }
   }
 }
 
@@ -48,6 +50,11 @@ async function querySuitTool(api: types.IExtensionApi, gameId: string) {
     const nexusModId: number = gameId === GAME_ID ? SUIT_TOOL_PAGE_ID : MM_SUIT_TOOL_PAGE_ID;
     // this tool is distributed directly as an exe so let's not use the regular installation mechanism
     const { downloadId, version } = await download(api, gameId, nexusModId);
+
+    if (downloadId === undefined) {
+      // The failed download should already be reported
+      return;
+    }
 
     const state = api.getState();
     const downloadInfo = state.persistent.downloads.files[downloadId];
@@ -145,6 +152,11 @@ async function download(api: types.IExtensionApi, gameId: string, nexusModId: nu
   // const modFiles: IFileInfo[] = await api.ext.nexusGetModFiles(gameId, nexusModId);
 
   const modFiles: IFileInfo[] = (await api.emitAndAwait('get-mod-files', gameId, nexusModId))[0];
+
+  if ((modFiles === undefined) || (modFiles.length === 0)) {
+    return { downloadId: undefined, version: undefined };
+  }
+
   const fileTime = (input: IFileInfo) => Number.parseInt(input.uploaded_time, 10);
 
   const latestFile: IFileInfo = modFiles
@@ -167,6 +179,11 @@ async function download(api: types.IExtensionApi, gameId: string, nexusModId: nu
 
 async function downloadAndInstall(api: types.IExtensionApi, gameId: string, nexusModId: number) {
   const { downloadId } = await download(api, gameId, nexusModId);
+
+  if (downloadId === undefined) {
+    // error should be reported elsewhere
+    return;
+  }
 
   // install the tool
   const modId = await util.toPromise(cb => api.events.emit('start-install-download', downloadId, false, cb));
