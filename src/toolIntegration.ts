@@ -151,6 +151,7 @@ async function download(api: types.IExtensionApi, gameId: string, nexusModId: nu
   // this requires vortex 1.7
   // const modFiles: IFileInfo[] = await api.ext.nexusGetModFiles(gameId, nexusModId);
 
+  await api.ext.ensureLoggedIn?.();
   const modFiles: IFileInfo[] = (await api.emitAndAwait('get-mod-files', gameId, nexusModId))[0];
 
   if ((modFiles === undefined) || (modFiles.length === 0)) {
